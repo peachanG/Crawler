@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""
+TwitterAPIを用いてTweetを収集するプログラム
+"""
+
 import configparser
 import codecs
 import os

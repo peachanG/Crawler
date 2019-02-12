@@ -1,6 +1,10 @@
 # !/usr/bin/env python
 # -*- coding:utf-8 -*-
 
+"""
+楽天市場APIを用いて商品情報を収集するプログラム
+"""
+
 import requests
 import configparser
 import codecs
