@@ -4,3 +4,4 @@
 *.pyproj
 *.sln
 *.suo
+*token.yml
