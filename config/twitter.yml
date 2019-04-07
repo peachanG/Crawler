@@ -2,8 +2,8 @@ search:
     lang: ja
     locale: ja
     result_type: recent
-    count:
-    until:
+    count: 1
+    until: 20190407
     search_count: 3
     # query = XXXXXXXXXX
     # geocode = XXXXXXXXXX
@@ -19,7 +19,7 @@ search:
 #lang:検索の対象となる地域の言語コード
 #local:検索クエリの言語コード
 #result_type:取得するツイートの種類
-#count:1回のアクセスにおける取得件数
+#count:1回のアクセスにおける取得件数 上限100
 #until:指定日より以前のツイートを取得
 #since_id:これより未来のツイートを取得
 #max_id:これより過去のツイートを取得

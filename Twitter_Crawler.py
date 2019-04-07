@@ -83,6 +83,7 @@ def main():
         except Exception as e:
             logger.debug(e)
             break
+
         if datas["statuses"] == []:
             logger.debug("There is no tweet.")
             break
