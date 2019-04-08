@@ -7,10 +7,10 @@ ENV LANG C.UTF-8
 ENV PYTHON_VERSION 3.7.3
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential checkinstall openssl tk-dev wget apt-utils\
+        build-essential checkinstall openssl tk-dev wget apt-utils git \
         libffi-dev libssl-dev libsqlite3-dev \
 	&& rm -rf /var/lib/apt/lists/* \
-    && mkdir /tmp/python3
+  && mkdir /tmp/python3
 
 WORKDIR /tmp/Python3
 RUN wget --no-check-certificate https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-${PYTHON_VERSION%%[a-z]*}.tar.xz \
