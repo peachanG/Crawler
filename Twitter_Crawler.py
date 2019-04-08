@@ -4,10 +4,15 @@ import os
 import codecs
 import json
 import argparse
+import ssl
 
 import twitter
 
 import utils.global_function as global_func
+
+
+# ssl認証
+ssl._create_default_https_context = ssl._create_unverified_context
 
 
 parser = argparse.ArgumentParser(description='Twitter Crawler')
@@ -17,6 +22,8 @@ parser.add_argument('--token', '-t', type=str, default='./twitter_token.yml',
                     help='twitter account token file path')
 parser.add_argument('--results_dir', '-r', type=str, default='results',
                     help='results directory path')
+parser.add_argument('--resume_search', '-resume', action='store_true',
+                    help='resume search flag')
 args = parser.parse_args()
 
 
@@ -25,6 +32,9 @@ def main():
     log_file_path = os.path.join(args.results_dir, "log")
     results_text_path = os.path.join(args.results_dir, "results.txt")
     results_json_path = os.path.join(args.results_dir, "tweets_{}.json")
+
+    """保存用のdirectoryの準備"""
+    os.makedirs(args.results_dir, exist_ok=True)
 
     """build logger"""
     logger = global_func.build_logger(log_file_path)
@@ -42,6 +52,7 @@ def main():
     """検索パラメータの読み込み"""
     q = "。,！,？+-\n+-笑+-「+-」+-w+-ｗ+-(+-（+-http+-https+exclude:retweets"  # URL投稿やリツイートを含まないようにクエリ設定
     search_params = config['search']
+    q = search_params.get('query', q)
     geocode = search_params.get('geocode', '')
     lang = search_params.get('lang', '')
     locale = search_params.get('locale', '')
@@ -54,11 +65,10 @@ def main():
 
     """検索パラメータ(非ポスト)の読み込み"""
     search_count = search_params.get('search_count', 1)
-    if search_count == 0:
-        search_count = True
+    search_flag = True
 
     """「最初から」もしくは「続きから」ツイートを取得"""
-    if os.path.exists(args.results_dir):
+    if args.resume_search:
         logger.debug("Getting from the continuation.")
         with open(results_text_path, 'r') as file_info:
             infos = file_info.readlines()
@@ -67,18 +77,23 @@ def main():
         collected_data_count = int(infos[2].split(":")[1])  # 取得ツイート数
     else:
         logger.debug("Getting from the beginning.")
-        os.mkdir(args.results_dir)
         tweets_no = 1  # 保存時の通し番号
         collected_data_count = 0  # 取得ツイート数
 
     """検索実行"""
     t = twitter.Twitter(auth=twitter.OAuth(AccessToken, AccessTokenSecret, ConsumerKey, ConsumerSecret), retry=True)
 
-    while search_count:
+    logger.debug((q, geocode, lang, locale,
+                  result_type, count, search_count, until, since_id, max_id, include_entities))
+
+    while search_flag:
         try:
             datas = t.search.tweets(q=q, geocode=geocode, lang=lang, locale=locale,
                                     result_type=result_type, count=count, until=until,
                                     since_id=since_id, max_id=max_id, include_entities=include_entities)
+            search_count -= 1
+            if search_count == 0:
+                search_flag = False
 
         except Exception as e:
             logger.debug(e)
@@ -86,7 +101,8 @@ def main():
 
         if datas["statuses"] == []:
             logger.debug("There is no tweet.")
-            break
+
+            continue
 
         with codecs.open(results_json_path.format(tweets_no), 'w', 'utf8') as fo:
             json.dump(datas["statuses"], fo, indent=4, ensure_ascii=False)
@@ -97,16 +113,13 @@ def main():
 
         """次の検索時の最大max_idの設定"""
         max_id = datas["statuses"][-1]["id"]  # 収集したデータからmax_idを直接取得する．next_paramsはたまに取得できないときがある？
-        max_id = str(int(max_id)-1)  # 検索はmax_id未満に対して行うはずなのだが，なぜか重複するため-1する．
+        max_id = str(int(max_id) - 1)  # 検索はmax_id未満に対して行うはずなのだが，なぜか重複するため-1する．
         # logger.debug("max_id:"+ str(max_id))#maxidの表示
 
         with open(results_text_path, 'w') as file_info:
             file_info.write("next_max_id:" + str(max_id) + "\n" +
                             "tweets_no:" + str(tweets_no) + "\n" +
                             "collected tweets:" + str(collected_data_count))
-
-        if type(search_count) == int:
-            search_count -= 1
 
         if collected_data_count == 0:
             logger.debug("Target tweets are nothing.")

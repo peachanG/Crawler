@@ -6,5 +6,6 @@ services:
     ports:
       - '8000:8888'
     volumes:
-      - '/home/masaya-k/work/cyberagent/data/Crawler:/work/data'
+      - '../data/Crawler:/data'
+      - './:/work'
     tty: true

@@ -2,9 +2,10 @@ search:
     lang: ja
     locale: ja
     result_type: recent
-    count: 1
-    until: 20190407
+    count: 3
+#    until: "2019-04-00"
     search_count: 3
+    query: "僕の優秀なフォロワーさん"
     # query = XXXXXXXXXX
     # geocode = XXXXXXXXXX
     # since_id = XXXXXXXXXX
