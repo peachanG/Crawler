@@ -4,3 +4,5 @@
 *.pyproj
 *.sln
 *.suo
+*token.yml
+jupyter_log
