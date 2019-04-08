@@ -27,7 +27,7 @@ RUN cd /usr/local/bin \
 
 WORKDIR /work
 RUN rm -rf /tmp/Python3
-COPY . /work
+COPY requirements.txt /work/requirements.txt
 
 RUN pip3 install -r requirements.txt
 EXPOSE 8888

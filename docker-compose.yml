@@ -6,6 +6,5 @@ services:
     ports:
       - '8000:8888'
     volumes:
-      - '../data/Crawler:/data'
       - './:/work'
     tty: true
