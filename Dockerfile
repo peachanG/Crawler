@@ -8,9 +8,11 @@ ENV PYTHON_VERSION 3.7.3
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential checkinstall openssl tk-dev wget apt-utils git \
-        libffi-dev libssl-dev libsqlite3-dev \
-	&& rm -rf /var/lib/apt/lists/* \
-  && mkdir /tmp/python3
+        libffi-dev libssl-dev libsqlite3-dev curl \
+    && curl -sL https://deb.nodesource.com/setup_9.x | bash - \
+    && apt-get install -y nodejs npm \
+    && rm -rf /var/lib/apt/lists/* \
+    && mkdir /tmp/python3
 
 WORKDIR /tmp/Python3
 RUN wget --no-check-certificate https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-${PYTHON_VERSION%%[a-z]*}.tar.xz \
@@ -30,4 +32,14 @@ RUN rm -rf /tmp/Python3
 COPY requirements.txt /work/requirements.txt
 
 RUN pip3 install -r requirements.txt
+RUN jupyter labextension install @lckr/jupyterlab_variableinspector
+RUN jupyter labextension install @krassowski/jupyterlab_go_to_definition
+RUN jupyter labextension install @jupyterlab/toc
 EXPOSE 8888
+
+RUN apt-get update && apt-get install -y language-pack-ja
+RUN update-locale LANG=ja_JP.UTF-8
+ENV LANG ja_JP.UTF-8
+
+CMD jupyter lab --port=8888 --allow-root --ip=0.0.0.0 \
+    --NotebookApp.password='sha1:d64ab5e4f2b3:2557966e4a31adb9fdf4ab66172db2aa6e64df9b'
