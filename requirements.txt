@@ -3,3 +3,4 @@ beautifulsoup4==4.6.0
 twitter==1.18.0
 pyyaml
 jupyterlab
+gensim
