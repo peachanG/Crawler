@@ -1,0 +1,3 @@
+account:
+  positive: [positive_bot3, kami_positive] #, positivekk_bot, maemukikotoba1, heart_meign, bot10586321]
+  negative: [n_siko, nega_bot] #, cynicalbot, UnluckyBot, Antinatalismbot]

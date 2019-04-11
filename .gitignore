@@ -4,7 +4,8 @@
 *.pyproj
 *.sln
 *.suo
-*token.yml
+log_dir/*
+log
 jupyter_log
 __pycache__
 .ipynb_checkpoints

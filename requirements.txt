@@ -4,3 +4,9 @@ twitter==1.18.0
 pyyaml
 jupyterlab
 gensim
+scikit-learn
+pandas
+mojimoji
+paramiko
+ipywidgets
+numexpr

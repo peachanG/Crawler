@@ -1,0 +1,6 @@
+library_name: mecab
+text_colums_name: wakati_text
+wakati_option:
+  dict_option: ''
+  delete_POS_list: ['BOS/EOS', '記号']
+  extract_POS_list: []

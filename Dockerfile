@@ -9,7 +9,7 @@ ENV PYTHON_VERSION 3.7.3
 RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential checkinstall openssl tk-dev wget apt-utils git \
         libffi-dev libssl-dev libsqlite3-dev curl unzip \
-        sudo swig mecab libmecab-dev mecab-ipadic-utf8 \
+        sudo swig mecab libmecab-dev mecab-ipadic-utf8 libbz2-dev \
         language-pack-ja \
     && curl -sL https://deb.nodesource.com/setup_9.x | bash - \
     && apt-get install -y nodejs npm \
@@ -44,6 +44,8 @@ RUN pip3 install -r requirements.txt
 RUN jupyter labextension install "@lckr/jupyterlab_variableinspector"
 RUN jupyter labextension install "@krassowski/jupyterlab_go_to_definition"
 RUN jupyter labextension install "@jupyterlab/toc"
+RUN jupyter labextension install "@jupyter-widgets/jupyterlab-manager"
+RUN jupyter nbextension enable --py --sys-prefix widgetsnbextension
 EXPOSE 8888
 
 # Install mecab
@@ -51,7 +53,7 @@ RUN git clone --depth 1 https://github.com/neologd/mecab-ipadic-neologd.git\
     && mecab-ipadic-neologd/bin/install-mecab-ipadic-neologd -n -y -p /usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ipadic-neologd \
     && rm -rf mecab-ipadic-neologd
 RUN sed -i 's/dicdir = \/var\/lib\/mecab\/dic\/debian/dicdir = \/usr\/lib\/x86_64-linux-gnu\/mecab\/dic\/mecab-ipadic-neologd/' /etc/mecabrc
-RUN pip3 install mecab-python3
+RUN pip3 install git+https://github.com/SamuraiT/mecab-python3
 
 # Install Ginza
 RUN git clone 'https://github.com/peachanG/ginza.git' \
