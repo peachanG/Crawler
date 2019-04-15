@@ -10,3 +10,4 @@ mojimoji
 paramiko
 ipywidgets
 numexpr
+neologdn

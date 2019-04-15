@@ -88,8 +88,10 @@ class TweetsGetter(object):
         必要の応じてoverride
         """
         text = text.lower()
+
+        #text = neologdn.normalize(text, repeat=2)
         # アルファベット, 記号（全角→半角), #かな（半角→全角）#数字（全角→半角）
-        text = mojimoji.zen_to_han(text, kana=False)
+        #text = mojimoji.zen_to_han(text, kana=False)
 
         # ()でかこまれた文章を削除
         text = re.sub('\(.*\)', '', text)
@@ -120,7 +122,7 @@ class TweetsGetter(object):
 
         # 空白を削除
         text = text.strip()
-
+        text = neologdn.normalize(text, repeat=2)
         return text
 
 
@@ -208,8 +210,9 @@ class UserTweetsGetter(TweetsGetter):
 
     def _text_norm(self, text):
         text = text.lower()
+
         # アルファベット, 記号（全角→半角), #かな（半角→全角）#数字（全角→半角）
-        text = mojimoji.zen_to_han(text, kana=False)
+        #text = mojimoji.zen_to_han(text, kana=False)
 
         # ()でかこまれた文章を削除
         text = re.sub('\(.*\)', '', text)
@@ -243,6 +246,7 @@ class UserTweetsGetter(TweetsGetter):
 
         # 空白削除
         text = text.strip()
+        text = neologdn.normalize(text, repeat=2)
         return text
 
 
