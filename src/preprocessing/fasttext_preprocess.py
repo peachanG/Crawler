@@ -31,7 +31,7 @@ def main():
 
     label_dict = {}
     text_list = []
-    for i, label_ in enumerate(os.listdir(args.input_dir)):
+    for i, label_ in enumerate(sorted(os.listdir(args.input_dir))):
         if label_[0] == '.':
             continue
         i += 1
@@ -49,26 +49,36 @@ def main():
         text_label_list = ['__label__{} '.format(i) + text + ' \n' for text in text_label_list]
         text_list.extend(text_label_list)
 
+    logger.debug(label_dict)
     before_num = len(text_list)
     text_list = list(set(text_list))
-    text_list = random.shuffle(text_list)
-    after_num = (len(text_list))
+    random.shuffle(text_list)
+    after_num = len(text_list)
     logger.debug('Duplicate {} => {}'.format(before_num, after_num))
 
-    train_ratio = 0.8
-    val_ratio = 0.1
-    test_ratio = 0.1
-    train_num = len(text_list) * train_ratio
-    val_num = len(text_list) * val_ratio
-    test_num = len(text_list) * test_ratio
     if args.separate:
-        # train
-        os.makedirs(os.path.dirname(args.output_text_path), exist_ok=True)
-        with open(, 'w') as f:
-            f.writelines(text_list)
+        # separate data to train, val, test
+        train_ratio = 0.8
+        val_ratio = 0.1
+        train_num = int(len(text_list) * train_ratio)
+        val_num = int(len(text_list) * val_ratio)
+        logger.debug('train_num: {}, val_num: {}, test_num: {}'.format(train_num, val_num, len(text_list)-train_num-val_num))
+        train_list = text_list[:train_num]
+        val_list = text_list[train_num:train_num+val_num]
+        test_list = text_list[train_num+val_num:]
+        os.makedirs(args.output_text_directory, exist_ok=True)
+        train_path = os.path.join(args.output_text_directory, 'train.txt')
+        val_path = os.path.join(args.output_text_directory, 'val.txt')
+        test_path = os.path.join(args.output_text_directory, 'test.txt')
+        with open(train_path, 'w') as f:
+            f.writelines(train_list)
+        with open(val_path, 'w') as f:
+            f.writelines(val_list)
+        with open(test_path, 'w') as f:
+            f.writelines(test_list)
     else:
-        os.makedirs(os.path.dirname(args.output_text_path), exist_ok=True)
-        with open(args., 'w') as f:
+        os.makedirs(os.path.dirname(args.output_text_directory), exist_ok=True)
+        with open(args.output_text_directory, 'w') as f:
             f.writelines(text_list)
 
 

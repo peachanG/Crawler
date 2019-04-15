@@ -24,7 +24,7 @@ osi.yml -s data/text_data/crawler
 python3 src/crawler/Twitter_Reply.py -config config/crawler/reply.yml -s data/text_data/reply
 ```
 
-## Twitter preprocessing
+## Preprocessing
 
 ### 分かち書き
 分かち書きのツールとしてMeCabとGiNZAが使用可能。
@@ -33,3 +33,12 @@ python3 src/crawler/Twitter_Reply.py -config config/crawler/reply.yml -s data/te
 python3 src/preprocessing/wakati.py -config config/preprocess/wakati.yml -input
  data/text_data/crawler/
 ```
+
+### FastText用のデータ・セットの準備
+FastText用のデータ・セットとして一つのtextファイルを作成
+```
+python3 src/preprocessing/fasttext_preprocess.py -input data/text_data/crawler -o data/text_data/fasttext_input --sepa
+rate -l log_dir/fast.log -column wakati_text
+```
+
+## Classification
