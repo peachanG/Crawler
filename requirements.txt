@@ -2,4 +2,12 @@ urllib3==1.22
 beautifulsoup4==4.6.0
 twitter==1.18.0
 pyyaml
-jupyter
+jupyterlab
+gensim
+scikit-learn
+pandas
+mojimoji
+paramiko
+ipywidgets
+numexpr
+neologdn
