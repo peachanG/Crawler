@@ -1,8 +1,54 @@
+import re
+
+import mojimoji
+
 import spacy
 import MeCab
 
 
-class Base_preprocess(object):
+def text_norm(text, delete_reply=False):
+    text = text.lower()
+
+    # アルファベット, 記号（全角→半角), #かな（半角→全角）#数字（全角→半角）
+    text = mojimoji.zen_to_han(text, kana=False)
+
+    # ()でかこまれた文章を削除
+#    text = re.sub('\(.*\)', '', text)
+#    text = re.sub('\【.*\】', '', text)
+#    text = re.sub('\-.*\-', '', text)
+#    text = re.sub('\『.*\』', '', text)
+
+    # ~~でかこまれた文章を削除
+    text = re.sub('\~.*\~', '', text)
+    # 改行を削除
+    text = re.sub('\n', '', text)
+
+    # 特定のtweetを削除
+    # RT
+    if text[:2] == 'rt':
+        return ''
+    # リプライ
+    if delete_reply:
+        if text[:1] == '@':
+            return ''
+
+    # URL
+    text = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
+    # ユーザ名
+    text = re.sub(r'@[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
+    # ハッシュタグ
+    text = re.sub(r'#[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
+    # unicode非対応の文字の削除
+    symbol = re.sub(r'[\u0000-\uE0FFF]', "", text)
+    if not symbol == "":
+        text = re.sub("[%s]" % symbol, "", text)
+
+    # 空白削除
+    text = text.strip()
+    return text
+
+
+class BasePreprocess(object):
     def __init__(self, dict_option='', delete_POS_list=['BOS/EOS', '記号'], extract_POS_list=[]):
         """textの前処理(親クラス).
 
@@ -49,7 +95,7 @@ class Base_preprocess(object):
         return output
 
 
-class MecabPreprocess(Base_preprocess):
+class MecabPreprocess(BasePreprocess):
     def __init__(self, dict_option='', delete_POS_list=['BOS/EOS', '記号'], extract_POS_list=[]):
         super(MecabPreprocess, self).__init__(dict_option, delete_POS_list, extract_POS_list)
 
@@ -85,8 +131,10 @@ class MecabPreprocess(Base_preprocess):
         return output
 
 
-class GinzaPreprocess(Base_preprocess):
-    def __init__(self, dict_option='ja_ginza_nopn', delete_POS_list=['BOS/EOS', '補助記号'], extract_POS_list=[]):
+class GinzaPreprocess(BasePreprocess):
+    def __init__(self, dict_option='ja_ginza_nopn',
+                 delete_POS_list=['BOS/EOS', '補助記号'],
+                 extract_POS_list=[]):
         super(GinzaPreprocess, self).__init__(dict_option, delete_POS_list, extract_POS_list)
 
     def _build_api(self, dict_option):

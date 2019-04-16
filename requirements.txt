@@ -6,8 +6,7 @@ jupyterlab
 gensim
 scikit-learn
 pandas
-mojimoji
 paramiko
 ipywidgets
 numexpr
-neologdn
+mojimoji

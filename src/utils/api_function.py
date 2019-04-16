@@ -1,12 +1,10 @@
 import os
-import re
 
 import pandas as pd
 import twitter
-import mojimoji
-
 
 import global_function as global_func
+import preprocess_function as preprocess_func
 
 
 def build_api(token_path):
@@ -43,6 +41,7 @@ class TweetsGetter(object):
         self._set_default_params()
         self.api = build_api(token_path)
         self.max_count = max_count
+        self.delete_reply = False
 
     def _set_default_params(self):
         self.key_list = ['created_at', 'id', 'screen_name', 'text']
@@ -69,8 +68,8 @@ class TweetsGetter(object):
     def _write_tweets_df(self, tweets):
         tweets_norm = [self._extract_data(tweet) for tweet in tweets]
         for tweet in tweets_norm:
-            text = self._text_norm(tweet[-1])
-            if text is None:
+            text = preprocess_func.text_norm(tweet[-1], self.delete_reply)
+            if text == '':
                 continue
             tweet[-1] = text
             tmp = pd.DataFrame(tweet, self.key_list)
@@ -82,48 +81,6 @@ class TweetsGetter(object):
             value = tweet['user'][key] if key in self.user_key_list else tweet[key]
             output_info.append(value)
         return output_info
-
-    def _text_norm(self, text):
-        """
-        必要の応じてoverride
-        """
-        text = text.lower()
-
-        #text = neologdn.normalize(text, repeat=2)
-        # アルファベット, 記号（全角→半角), #かな（半角→全角）#数字（全角→半角）
-        #text = mojimoji.zen_to_han(text, kana=False)
-
-        # ()でかこまれた文章を削除
-        text = re.sub('\(.*\)', '', text)
-        text = re.sub('\【.*\】', '', text)
-        text = re.sub('\-.*\-', '', text)
-        text = re.sub('\『.*\』', '', text)
-
-        # ~~でかこまれた文章を削除
-        text = re.sub('\~.*\~', '', text)
-        # 改行を削除
-        text = re.sub('\n', '', text)
-
-        # 特定のtweetを削除
-        # RT
-        if text[:2] == 'rt':
-            return None
-
-        # URL
-        text = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
-        # ユーザ名
-        text = re.sub(r'@[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
-        # ハッシュタグ
-        text = re.sub(r'#[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
-        # unicode非対応の文字の削除
-        symbol = re.sub(r'[\u0000-\uE0FFF]', "", text)
-        if not symbol == "":
-            text = re.sub("[%s]" % symbol, "", text)
-
-        # 空白を削除
-        text = text.strip()
-        text = neologdn.normalize(text, repeat=2)
-        return text
 
 
 class UserTweetsGetter(TweetsGetter):
@@ -146,6 +103,7 @@ class UserTweetsGetter(TweetsGetter):
     """
     def __init__(self, token_path, max_count=100):
         super(UserTweetsGetter, self).__init__(token_path, max_count)
+        self.delete_reply = True
 
     def set_user(self, screen_name):
         self.screen_name = screen_name
@@ -208,47 +166,6 @@ class UserTweetsGetter(TweetsGetter):
                                                          count=self.max_count)
         return tweets
 
-    def _text_norm(self, text):
-        text = text.lower()
-
-        # アルファベット, 記号（全角→半角), #かな（半角→全角）#数字（全角→半角）
-        #text = mojimoji.zen_to_han(text, kana=False)
-
-        # ()でかこまれた文章を削除
-        text = re.sub('\(.*\)', '', text)
-        text = re.sub('\【.*\】', '', text)
-        text = re.sub('\-.*\-', '', text)
-        text = re.sub('\『.*\』', '', text)
-
-        # ~~でかこまれた文章を削除
-        text = re.sub('\~.*\~', '', text)
-        # 改行を削除
-        text = re.sub('\n', '', text)
-
-        # 特定のtweetを削除
-        # RT
-        if text[:2] == 'rt':
-            return None
-        # リプライ
-        if text[0] == '@':
-            return None
-
-        # URL
-        text = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
-        # ユーザ名
-        text = re.sub(r'@[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
-        # ハッシュタグ
-        text = re.sub(r'#[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", text)
-        # unicode非対応の文字の削除
-        symbol = re.sub(r'[\u0000-\uE0FFF]', "", text)
-        if not symbol == "":
-            text = re.sub("[%s]" % symbol, "", text)
-
-        # 空白削除
-        text = text.strip()
-        text = neologdn.normalize(text, repeat=2)
-        return text
-
 
 class ReplyTweetsGetter(TweetsGetter):
     """twitterの特定のtweetの対するリプライを集める.
@@ -290,6 +207,7 @@ class ReplyTweetsGetter(TweetsGetter):
 
         self.df = self.df.dropna(subset=['text'])
         self.df = self.df[self.df['text'] != '']
+        self.df = self.df.drop_duplicates(keep='first', subset='text')
         self.df.to_csv(self.csv_path, index=False)
         del self.df
 
