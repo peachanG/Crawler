@@ -44,8 +44,10 @@ def main():
             csv_path = os.path.join(label_path, csv_name)
             logger.debug('Read csv ==> {}'.format(csv_path))
             df = pd.read_csv(csv_path, engine='python')
+            df = df.dropna(subset=[args.text_column])
             text_label_list.extend(df[args.text_column].values.tolist())
 
+        # text_label_list = ['__label__{} '.format(i) + text + ' \n' for text in text_label_list]
         text_label_list = ['__label__{} '.format(i) + text + ' \n' for text in text_label_list]
         text_list.extend(text_label_list)
 

@@ -131,6 +131,7 @@ class UserTweetsGetter(TweetsGetter):
 
         self.df = self.df.dropna(subset=['text'])
         self.df = self.df[self.df['text'] != '']
+        self.df = self.df.drop_duplicates(keep='first', subset='text')
         self.df.to_csv(self.csv_path, index=False)
         del self.df
 

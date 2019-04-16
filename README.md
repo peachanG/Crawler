@@ -15,7 +15,7 @@ twitterのデータを集める。
 
 ### 特定ユーザーのツイートを所得
 ```
-python3 src/crawler/Twitter_User_tweets.py -config config/crawler/crawler_negaposi.yml -s data/text_data/crawler
+python3 src/crawler/Twitter_User_tweets.py -config config/crawler/negaposi.yml -s data/text_data/crawler/negaposi
 ```
 
 ### 特定のツイートに対するリプライを所得(深さ2ツイート分まで)
@@ -29,13 +29,13 @@ python3 src/crawler/Twitter_Reply.py -config config/crawler/reply.yml -s data/te
 分かち書きのツールとしてMeCabとGiNZAが使用可能。
 
 ```
-python3 src/preprocessing/wakati.py -config config/preprocess/wakati.yml -input data/text_data/crawler/
+python3 src/preprocessing/wakati.py -config config/preprocess/mecab_wakati.yml -input data/text_data/crawler/negaposi
 ```
 
 ### FastText用のデータ・セットの準備
 FastText用のデータ・セットとして一つのtextファイルを作成
 ```
-python3 src/preprocessing/fasttext_preprocess.py -input data/text_data/crawler -o data/text_data/fasttext_input --separate -l log_dir/fast.log -column wakati_text
+python3 src/preprocessing/fasttext_preprocess.py -input data/text_data/crawler/negaposi -o data/text_data/fasttext_input --separate -l log_dir/fast.log -column ginza_text
 ```
 
 ## Classification
