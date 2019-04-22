@@ -263,7 +263,7 @@ class SearchGetter(TweetsGetter):
     """
     def __init__(self, token_path, max_count=100):
         super(SearchGetter, self).__init__(token_path, max_count)
-        self.delete_reply = True
+        self.delete_reply = False
 
     def set_csv_path(self, csv_path):
         self.csv_path = csv_path
