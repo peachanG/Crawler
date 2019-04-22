@@ -9,6 +9,8 @@ log
 jupyter_log
 __pycache__
 .ipynb_checkpoints
+*service-account.json
+*.env
 
 data/*
 .remote-sync.json

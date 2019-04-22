@@ -6,8 +6,11 @@ import spacy
 import MeCab
 
 
-def text_norm(text, delete_reply=False):
+def text_norm(text, delete_reply=False, return_empty_phrase='shindanmaker'):
     text = text.lower()
+
+    if return_empty_phrase in text:
+        text = ''
 
     # アルファベット, 記号（全角→半角), #かな（半角→全角）#数字（全角→半角）
     text = mojimoji.zen_to_han(text, kana=False)

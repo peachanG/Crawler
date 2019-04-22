@@ -242,3 +242,95 @@ class ReplyTweetsGetter(TweetsGetter):
                                             count=self.max_count)['statuses']
 
         return tweets
+
+
+class SearchGetter(TweetsGetter):
+    """twitterの特定のtweetの対するリプライを集める.
+
+    # Arguments
+        token_path: twitter apiのtoken　configのpath
+        max_count: apiの一回のリクエストで要求するtweet数
+        ## set_default_params
+        APIの返り値からcsvへの出力のkeyを設定
+
+    # How to use
+        getter = ReplyTweetsGetter(token_path, csv_dir)
+        getter.set_csv_dir('data/text_data/crawler/nega')
+        getter.set_root_tweet(1115797923499892736)
+        getter.get_tweets()
+        ==> csv_dir/'{}.csv'.format(root_tweet_id)に所得したreplyを保存
+
+    """
+    def __init__(self, token_path, max_count=100):
+        super(SearchGetter, self).__init__(token_path, max_count)
+        self.delete_reply = True
+
+    def set_csv_path(self, csv_path):
+        self.csv_path = csv_path
+        if os.path.isfile(self.csv_path):  # resume twitter crawler
+            self.base_df = pd.read_csv(self.csv_path)
+            self.since_id = self.base_df['id'].iat[0]
+            self.resume_flag = True
+        else:  # first crawler
+            self.resume_flag = False
+            self.since_id = None
+
+    def set_query(self, query):
+        self.query = query
+
+    def get_tweets(self):
+        self.df = pd.DataFrame()
+        reply_list = self._get_tweets_search()
+        if len(reply_list) == 0:
+            return
+
+        self._write_tweets_df(reply_list)
+
+        if self.resume_flag:
+            self.df = pd.concat([self.df, self.base_df])
+
+        self.df = self.df.dropna(subset=['text'])
+        self.df = self.df[self.df['text'] != '']
+        self.df = self.df.drop_duplicates(keep='first', subset='text')
+        self.df.to_csv(self.csv_path, index=False)
+        del self.df
+
+    def _get_tweets_search(self):
+        tweets_list = []
+        max_id = None
+        while True:
+            responce_list = self._get_tweets_core(self.query, self.since_id, max_id)
+            if len(responce_list) == 0:
+                break
+            for responce in responce_list:
+                tweets_list.append(responce)
+            if len(responce_list) < self.max_count:
+                break
+            max_id = responce_list[-1]['id'] - 1
+
+        return tweets_list
+
+    def _get_tweets_core(self, query, since_id=None, max_id=None):
+        if self.since_id is None:
+            if max_id is None:  # 1回目のsearch
+                tweets = self.api.search.tweets(q=query,
+                                                lang='ja',
+                                                count=self.max_count)['statuses']
+            else:  # 2回目のsearch
+                tweets = self.api.search.tweets(q=query,
+                                                max_id=max_id,
+                                                lang='ja',
+                                                count=self.max_count)['statuses']
+        else:
+            if max_id is None:  # 1回目のsearch
+                tweets = self.api.search.tweets(q=query,
+                                                since_id=since_id,
+                                                lang='ja',
+                                                count=self.max_count)['statuses']
+            else:  # 2回目のsearch
+                tweets = self.api.search.tweets(q=query,
+                                                max_id=max_id,
+                                                since_id=since_id,
+                                                lang='ja',
+                                                count=self.max_count)['statuses']
+        return tweets

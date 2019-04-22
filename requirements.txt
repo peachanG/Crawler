@@ -10,3 +10,4 @@ paramiko
 ipywidgets
 numexpr
 mojimoji
+google-cloud-storage
